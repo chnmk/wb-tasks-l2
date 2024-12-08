@@ -1,4 +1,10 @@
-package main
+package CurrentTime
+
+import (
+	"fmt"
+
+	"github.com/beevik/ntp"
+)
 
 /*
 === Базовая задача ===
@@ -12,6 +18,13 @@ package main
 Программа должна проходить проверки go vet и golint.
 */
 
-func main() {
+func GetCurrentTime() {
+	time, err := ntp.Time("0.beevik-ntp.pool.ntp.org")
+	if err != nil {
+		// STDERR, код выхода
+		fmt.Println(err)
+	}
 
+	// go vet, golint
+	fmt.Println(time)
 }

@@ -18,6 +18,12 @@ package main
 Функция должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
-func main() {
+func Unpack(input string) string {
+	// Проверить что строка не пустая
+	// ...
 
+	// Итерация
+	// ...
+
+	return ""
 }

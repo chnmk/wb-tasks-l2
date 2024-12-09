@@ -1,5 +1,10 @@
 package main
 
+import (
+	"sort"
+	"strings"
+)
+
 /*
 === Поиск анаграмм по словарю ===
 
@@ -19,6 +24,48 @@ package main
 Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
-func main() {
+func sortLetters(word string) string {
+	l := strings.Split(word, "")
 
+	sort.Strings(l)
+
+	return strings.Join(l, "")
 }
+
+func Search(input *[]string) *map[string][]string {
+	// Массив должен быть отсортирован по возрастанию - значит, отсоритровать заранее?
+
+	result := make(map[string][]string)
+
+	// Подумать над ссылками
+	for _, word := range *input {
+		createNew := true
+
+		wordLower := strings.ToLower(word)
+		wordSorted := sortLetters(wordLower)
+
+		// Подумать над оптимизацией
+		for key := range result {
+			if sortLetters(key) == wordSorted {
+				result[key] = append(result[key], wordLower)
+				createNew = false
+			}
+		}
+
+		if createNew {
+			result[wordLower] = []string{wordLower}
+		}
+	}
+
+	// Множества из одного элемента не должны попасть в результат
+	// В результате каждое слово должно встречаться только один раз (удалить заранее?)
+
+	return &result
+}
+
+/*
+func main() {
+	arr := []string{"пятак", "пятка", "тяпка", "листок", "слиток", "столик"}
+	fmt.Println(Search(&arr))
+}
+*/

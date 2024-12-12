@@ -1,5 +1,13 @@
 package main
 
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+)
+
 /*
 === HTTP server ===
 
@@ -18,10 +26,44 @@ package main
 В рамках задачи необходимо:
 	1. Реализовать все методы.
 	2. Бизнес логика НЕ должна зависеть от кода HTTP сервера.
-	3. В случае ошибки бизнес-логики сервер должен возвращать HTTP 503. В случае ошибки входных данных (невалидный int например) сервер должен возвращать HTTP 400. В случае остальных ошибок сервер должен возвращать HTTP 500. Web-сервер должен запускаться на порту указанном в конфиге и выводить в лог каждый обработанный запрос.
+	3. В случае ошибки бизнес-логики сервер должен возвращать HTTP 503.
+	В случае ошибки входных данных (невалидный int например) сервер должен возвращать HTTP 400.
+	В случае остальных ошибок сервер должен возвращать HTTP 500.
+	Web-сервер должен запускаться на порту указанном в конфиге и выводить в лог каждый обработанный запрос.
 	4. Код должен проходить проверки go vet и golint.
 */
 
 func main() {
+	// Бизнес логика НЕ должна зависеть от кода HTTP сервера.
+	http.HandleFunc("/create_event", Logger(CreateEvent))
+	http.HandleFunc("/update_event", Logger(UpdateEvent))
+	http.HandleFunc("/delete_event", Logger(DeleteEvent))
+	http.HandleFunc("/events_for_day", Logger(EventsForDay))
+	http.HandleFunc("/events_for_week", Logger(EventsForWeek))
+	http.HandleFunc("/events_for_month", Logger(EventsForMonth))
 
+	// Сервер с реализацией graceful shutdown.
+	// https://pkg.go.dev/net/http#Server.Shutdown
+	server := &http.Server{Addr: ":3000", Handler: nil}
+
+	idleConnsClosed := make(chan struct{})
+
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		<-sigint
+
+		if err := server.Shutdown(context.Background()); err != nil {
+			log.Printf("HTTP server Shutdown: %v", err)
+		}
+		close(idleConnsClosed)
+	}()
+
+	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+		log.Fatalf("HTTP server ListenAndServe: %v", err)
+	}
+
+	<-idleConnsClosed
+
+	log.Println("shutdown complete")
 }

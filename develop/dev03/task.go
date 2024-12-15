@@ -50,6 +50,8 @@ func main() {
 		panic(err)
 	}
 
+	defer file.Close()
+
 	var list []string
 
 	scanner := bufio.NewScanner(file)

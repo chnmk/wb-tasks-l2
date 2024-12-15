@@ -1,5 +1,12 @@
 package main
 
+import (
+	"io"
+	"log"
+	"net/http"
+	"os"
+)
+
 /*
 === Утилита wget ===
 
@@ -9,5 +16,26 @@ package main
 */
 
 func main() {
+	file, err := os.Create("example.html")
+	if err != nil {
+		panic(
+			err)
+	}
+	defer file.Close()
 
+	r, err := http.Get("https://google.com")
+	if err != nil {
+		panic(err)
+	}
+
+	defer r.Body.Close()
+
+	if r.StatusCode != http.StatusOK {
+		log.Fatal("request denied")
+	}
+
+	_, err = io.Copy(file, r.Body)
+	if err != nil {
+		panic(err)
+	}
 }

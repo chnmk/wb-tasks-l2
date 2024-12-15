@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"net"
+)
+
 /*
 === Утилита telnet ===
 
@@ -18,5 +23,11 @@ go-telnet --timeout=3s 1.1.1.1 123
 */
 
 func main() {
+	conn, err := net.Dial("tcp", "golang.org:http")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
+	defer conn.Close()
 }

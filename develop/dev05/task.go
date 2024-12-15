@@ -1,5 +1,12 @@
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+)
+
 /*
 === Утилита grep ===
 
@@ -18,6 +25,27 @@ package main
 Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
-func main() {
+func init() {
+	GetFlags()
+}
 
+func main() {
+	file, err := os.Open("examples/example.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	defer file.Close()
+
+	scan := bufio.NewScanner(file)
+
+	for scan.Scan() {
+		text := scan.Text()
+
+		// TODO: получать необходимый паттерн при запуске утилиты
+		// TODO: условия по флагам
+		if strings.Contains(text, "ы") {
+			fmt.Println(text)
+		}
+	}
 }

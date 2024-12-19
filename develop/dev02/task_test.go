@@ -1,43 +1,61 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestUnpackEmptyString(t *testing.T) {
-	/*
-		Unpack("")
+	r := Unpack("")
 
-		if false {
-			t.Error("error")
-		}
-	*/
+	if r != "" {
+		t.Error("expected empty output")
+	}
 }
 
 func TestUnpackInvalidString(t *testing.T) {
-	/*
-		Unpack("")
+	r := Unpack("45")
 
-		if false {
-			t.Error("error")
-		}
-	*/
+	if r != "" {
+		t.Error("expected empty output")
+	}
+}
+
+func TestUnpackNoNumbers(t *testing.T) {
+	r := Unpack("abcd")
+
+	if r != "abcd" {
+		t.Error("expected same string")
+	}
 }
 
 func TestUnpackValidString(t *testing.T) {
-	/*
-		Unpack("")
+	r := Unpack("a4bc2d5e")
 
-		if false {
-			t.Error("error")
-		}
-	*/
+	if r != "aaaabccddddde" {
+		t.Error("wrong output")
+	}
 }
 
 func TestUnpackEscapeChars(t *testing.T) {
-	/*
-		Unpack("")
+	r := Unpack("qwe\\4\\5")
 
-		if false {
-			t.Error("error")
-		}
-	*/
+	if r != "qwe45" {
+		t.Errorf("wrong output: expected qwe45, got %s", r)
+	}
+}
+
+func TestUnpackEscapeCharsTwoDigits(t *testing.T) {
+	r := Unpack("qwe\\45")
+
+	if r != "qwe44444" {
+		t.Errorf("wrong output: expected qwe44444, got %s", r)
+	}
+}
+
+func TestUnpackEscapeCharsBackslashes(t *testing.T) {
+	r := Unpack("qwe\\\\5")
+
+	if r != "qwe\\\\\\\\\\" {
+		t.Errorf("wrong output: expected qwe\\\\\\\\\\, got %s", r)
+	}
 }

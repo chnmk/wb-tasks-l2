@@ -34,16 +34,14 @@ import (
 var columnId = 0
 var months map[string]int
 
-func init() {
-	GetFlags()
-}
-
 // Пример использования:
 // go run . -r examples/example.txt output.txt
 //
 // Приоритет флагов при попытке одноврменно использовать противоречащие:
 // h > n > M
 func main() {
+	GetFlags()
+
 	// Чтение файла.
 	list, err := read()
 	if err != nil {
@@ -138,7 +136,7 @@ func sortList(list []string) ([]string, error) {
 	if c {
 		ok := slices.IsSortedFunc(list, sortFunc)
 		if ok {
-			fmt.Println("данные уже отсортированы")
+			log.Println("данные уже отсортированы")
 			return list, nil
 		}
 	}
@@ -206,7 +204,7 @@ func compareNum(a, b string) int {
 
 	if aInt > bInt {
 		return 1
-	} else if bInt < aInt {
+	} else if aInt < bInt {
 		return -1
 	}
 
@@ -234,7 +232,7 @@ func compareSuffix(a, b string) int {
 		return 1
 	}
 
-	if bInt < aInt {
+	if aInt < bInt {
 		return -1
 	}
 
@@ -255,7 +253,7 @@ func compareSuffix(a, b string) int {
 			return 1
 		}
 
-		if bSuf < aSuf {
+		if aSuf < bSuf {
 			return -1
 		}
 	}

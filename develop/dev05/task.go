@@ -25,10 +25,6 @@ import (
 -n - "line num", печатать номер строки
 */
 
-func init() {
-
-}
-
 // Пример использования:
 // go run . -A 1 examples/example.txt output.txt Втор
 func main() {
@@ -114,8 +110,8 @@ func filterFile(list []string) []string {
 		if F {
 			if s == pattern {
 				found = append(found, num)
-				continue
 			}
+			continue
 		}
 
 		// Если нужен паттерн.
@@ -133,12 +129,13 @@ func filterFile(list []string) []string {
 				if len(list) > num+add {
 					new := list[num+add]
 					if n {
-						new = strconv.Itoa(num) + " " + new
+						new = strconv.Itoa(num+1) + " " + new
 					}
 
 					result = append(result, new)
 				}
 			}
+			continue
 		}
 
 		// Печатать +N строк до совпадения.
@@ -147,7 +144,7 @@ func filterFile(list []string) []string {
 				if num-add-1 >= 0 {
 					new := list[num-add]
 					if n {
-						new = strconv.Itoa(num) + " " + new
+						new = strconv.Itoa(num+1) + " " + new
 					}
 
 					result = append(result, new)
@@ -155,33 +152,43 @@ func filterFile(list []string) []string {
 			}
 
 			result = append(result, list[num])
+			continue
 		}
 
 		// Печатать ±N строк вокруг совпадения.
 		if C != 0 {
-			for add := 1; add <= C; add++ {
-				if len(list) > num+add {
-					new := list[num+add]
-					if n {
-						new = strconv.Itoa(num) + " " + new
-					}
-
-					result = append(result, new)
-				}
-			}
-			result = append(result, list[num])
-
 			for add := C; add > 0; add-- {
 				if num-add-1 >= 0 {
 					new := list[num-add]
 					if n {
-						new = strconv.Itoa(num) + " " + new
+						new = strconv.Itoa(num+1) + " " + new
 					}
 
 					result = append(result, new)
 				}
 			}
+
+			result = append(result, list[num])
+
+			for add := 1; add <= C; add++ {
+				if len(list) > num+add {
+					new := list[num+add]
+					if n {
+						new = strconv.Itoa(num+1) + " " + new
+					}
+
+					result = append(result, new)
+				}
+			}
+			continue
 		}
+
+		new := list[num]
+		if n {
+			new = strconv.Itoa(num+1) + " " + new
+		}
+
+		result = append(result, new)
 	}
 
 	// Вместо совпадения, исключать.
@@ -189,12 +196,17 @@ func filterFile(list []string) []string {
 		var result2 []string
 
 		j := 0
-		for _, s := range list {
-			if s == result[j] {
-				j++
-				continue
+		for num, s := range list {
+			if len(result) > j {
+				if s == result[j] {
+					j++
+					continue
+				}
 			}
 
+			if n {
+				s = strconv.Itoa(num+1) + " " + s
+			}
 			result2 = append(result2, s)
 		}
 

@@ -53,10 +53,13 @@ func GetFlags() {
 
 	flag.Parse()
 
+	if len(flag.Args()) != 2 {
+		log.Fatal("ожидались файлы для чтения и записи")
+	}
+
 	input = flag.Arg(0)
 	output = flag.Arg(1)
 	if input[len(input)-4:] != ".txt" || output[len(output)-4:] != ".txt" {
-		log.Print(input[len(input)-4:])
 		log.Fatal("ожидались файлы для чтения и записи")
 	}
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"sort"
 	"strings"
 )
@@ -20,33 +21,27 @@ import (
 Множества из одного элемента не должны попасть в результат.
 Все слова должны быть приведены к нижнему регистру.
 В результате каждое слово должно встречаться только один раз.
-
-Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
-func sortLetters(word string) string {
-	l := strings.Split(word, "")
-
-	sort.Strings(l)
-
-	return strings.Join(l, "")
-}
-
 func Search(input *[]string) *map[string][]string {
-	// Массив должен быть отсортирован по возрастанию - значит, отсоритровать заранее?
-
 	result := make(map[string][]string)
 
-	// Подумать над ссылками
+	dublicates := make(map[string]struct{})
+
 	for _, word := range *input {
+		// В результате каждое слово должно встречаться только один раз.
+		_, ok := dublicates[word]
+		if ok {
+			continue
+		}
+
+		dublicates[word] = struct{}{}
+
 		createNew := true
-
 		wordLower := strings.ToLower(word)
-		wordSorted := sortLetters(wordLower)
 
-		// Подумать над оптимизацией
 		for key := range result {
-			if sortLetters(key) == wordSorted {
+			if sortLetters(key) == sortLetters(wordLower) {
 				result[key] = append(result[key], wordLower)
 				createNew = false
 			}
@@ -57,15 +52,23 @@ func Search(input *[]string) *map[string][]string {
 		}
 	}
 
-	// Множества из одного элемента не должны попасть в результат
-	// В результате каждое слово должно встречаться только один раз (удалить заранее?)
+	for k, v := range result {
+		// Множества из одного элемента не должны попасть в результат
+		if len(v) < 2 {
+			delete(result, k)
+		}
+
+		// Массив должен быть отсортирован по возрастанию
+		slices.Sort(v)
+	}
 
 	return &result
 }
 
-/*
-func main() {
-	arr := []string{"пятак", "пятка", "тяпка", "листок", "слиток", "столик"}
-	fmt.Println(Search(&arr))
+func sortLetters(word string) string {
+	l := strings.Split(word, "")
+
+	sort.Strings(l)
+
+	return strings.Join(l, "")
 }
-*/

@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -21,31 +23,183 @@ import (
 -v - "invert" (вместо совпадения, исключать)
 -F - "fixed", точное совпадение со строкой, не паттерн
 -n - "line num", печатать номер строки
-
-Программа должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
 func init() {
-	GetFlags()
+
 }
 
+// Пример использования:
+// go run . -A 1 examples/example.txt output.txt Втор
 func main() {
-	file, err := os.Open("examples/example.txt")
+	GetFlags()
+
+	// Приоритет флагов при попытке одноврменно использовать противоречащие:
+	// C > A > B
+	if B != 0 && A != 0 {
+		B = 0
+		if C != 0 {
+			B = 0
+		}
+	}
+
+	// Чтение файла.
+	list, err := read()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
+	}
+
+	// Фильтрация.
+	list = filterFile(list)
+
+	// Запись результата.
+	err = write(output, list)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func read() ([]string, error) {
+	var list []string
+
+	file, err := os.Open(input)
+	if err != nil {
+		return []string{}, err
 	}
 
 	defer file.Close()
 
-	scan := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		list = append(list, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return []string{}, err
+	}
 
-	for scan.Scan() {
-		text := scan.Text()
+	return list, nil
+}
 
-		// TODO: получать необходимый паттерн при запуске утилиты
-		// TODO: условия по флагам
-		if strings.Contains(text, "ы") {
-			fmt.Println(text)
+func write(path string, text []string) error {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	for _, s := range text {
+		fmt.Fprintln(file, s)
+	}
+
+	return nil
+}
+
+func filterFile(list []string) []string {
+	var result []string
+
+	// Ограничить количество строк.
+	if c != 0 {
+		list = list[:c]
+	}
+
+	var found []int
+	for num, s := range list {
+		// Игнорировать регистр.
+		if i {
+			s = strings.ToLower(s)
+		}
+
+		// Точное совпадение со строкой, не паттерн.
+		if F {
+			if s == pattern {
+				found = append(found, num)
+				continue
+			}
+		}
+
+		// Если нужен паттерн.
+		if strings.Contains(s, pattern) {
+			found = append(found, num)
 		}
 	}
+
+	for _, num := range found {
+		// Печатать +N строк после совпадения.
+		if A != 0 {
+			result = append(result, list[num])
+
+			for add := 1; add <= A; add++ {
+				if len(list) > num+add {
+					new := list[num+add]
+					if n {
+						new = strconv.Itoa(num) + " " + new
+					}
+
+					result = append(result, new)
+				}
+			}
+		}
+
+		// Печатать +N строк до совпадения.
+		if B != 0 {
+			for add := B; add > 0; add-- {
+				if num-add-1 >= 0 {
+					new := list[num-add]
+					if n {
+						new = strconv.Itoa(num) + " " + new
+					}
+
+					result = append(result, new)
+				}
+			}
+
+			result = append(result, list[num])
+		}
+
+		// Печатать ±N строк вокруг совпадения.
+		if C != 0 {
+			for add := 1; add <= C; add++ {
+				if len(list) > num+add {
+					new := list[num+add]
+					if n {
+						new = strconv.Itoa(num) + " " + new
+					}
+
+					result = append(result, new)
+				}
+			}
+			result = append(result, list[num])
+
+			for add := C; add > 0; add-- {
+				if num-add-1 >= 0 {
+					new := list[num-add]
+					if n {
+						new = strconv.Itoa(num) + " " + new
+					}
+
+					result = append(result, new)
+				}
+			}
+		}
+	}
+
+	// Вместо совпадения, исключать.
+	if v {
+		var result2 []string
+
+		j := 0
+		for _, s := range list {
+			if s == result[j] {
+				j++
+				continue
+			}
+
+			result2 = append(result2, s)
+		}
+
+		return result2
+	}
+
+	return result
 }

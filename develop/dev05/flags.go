@@ -1,6 +1,9 @@
 package main
 
-import "flag"
+import (
+	"flag"
+	"log"
+)
 
 /*
 -A - "after" печатать +N строк после совпадения
@@ -14,26 +17,41 @@ import "flag"
 */
 
 var (
-	A int
-	B int
-	C int
-	c int
+	input   string // Файл .txt, который необходимо отсортировать.
+	output  string // Файл .txt, в который записывается результат.
+	pattern string // Паттерн поиска.
 
-	i bool
-	v bool
-	F bool
-	n bool
+	A int // печатать +N строк после совпадения
+	B int // печатать +N строк до совпадения
+	C int // печатать ±N строк вокруг совпадения
+	c int // количество строк
+
+	i bool // игнорировать регистр
+	v bool // вместо совпадения, исключать
+	F bool // точное совпадение со строкой, не паттерн
+	n bool // печатать номер строки
 )
 
 func GetFlags() {
-	flag.IntVar(&A, "A", 1, "TODO")
-	flag.IntVar(&B, "B", 1, "TODO")
-	flag.IntVar(&C, "C", 1, "TODO")
-	flag.IntVar(&c, "c", 1, "TODO")
-	flag.BoolVar(&i, "i", false, "TODO")
-	flag.BoolVar(&v, "v", false, "TODO")
-	flag.BoolVar(&F, "F", false, "TODO")
-	flag.BoolVar(&n, "n", false, "TODO")
+	flag.IntVar(&A, "A", 0, "печатать +N строк после совпадения")
+	flag.IntVar(&B, "B", 0, "печатать +N строк до совпадения")
+	flag.IntVar(&C, "C", 0, "печатать ±N строк вокруг совпадения")
+	flag.IntVar(&c, "c", 0, "количество строк")
+	flag.BoolVar(&i, "i", false, "игнорировать регистр")
+	flag.BoolVar(&v, "v", false, "вместо совпадения, исключать")
+	flag.BoolVar(&F, "F", false, "точное совпадение со строкой, не паттерн")
+	flag.BoolVar(&n, "n", false, "печатать номер строки")
 
 	flag.Parse()
+
+	if len(flag.Args()) != 3 {
+		log.Fatal("ожидались файлы для чтения и записи, а также паттерн поиска")
+	}
+
+	input = flag.Arg(0)
+	output = flag.Arg(1)
+	pattern = flag.Arg(2)
+	if input[len(input)-4:] != ".txt" || output[len(output)-4:] != ".txt" || pattern == "" {
+		log.Fatal("ожидались файлы для чтения и записи, а также паттерн поиска")
+	}
 }

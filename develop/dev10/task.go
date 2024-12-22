@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -26,12 +28,17 @@ go-telnet --timeout=3s 1.1.1.1 123
 При подключении к несуществующему сервер, программа должна завершаться через timeout.
 */
 
-func main() {
+func Telnet() {
 	GetFlags()
+	log.SetOutput(os.Stdout)
+	connect()
+}
 
+func connect() {
 	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", host, port), time.Duration(timeout)*time.Second)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return
 	}
 
 	defer conn.Close()
@@ -42,6 +49,11 @@ func main() {
 		// Отправляет сообщение.
 		input, err := r.ReadString('\n')
 		if err != nil {
+			// Завершение через Ctrl+D
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
 			log.Println(err)
 			continue
 		}
@@ -55,6 +67,8 @@ func main() {
 			continue
 		}
 
-		fmt.Println(status)
+		log.Println(status)
 	}
+
+	log.Println("shutting down...")
 }

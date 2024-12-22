@@ -34,7 +34,6 @@ import (
 */
 
 func main() {
-	// Бизнес логика НЕ должна зависеть от кода HTTP сервера.
 	http.HandleFunc("/create_event", Logger(CreateEvent))
 	http.HandleFunc("/update_event", Logger(UpdateEvent))
 	http.HandleFunc("/delete_event", Logger(DeleteEvent))

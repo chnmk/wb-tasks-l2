@@ -2,40 +2,46 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
-	"strconv"
-	"time"
 )
 
+type response struct {
+	Result result `json:"result"`
+}
+
 type result struct {
-	Events []Event
+	Events []Event `json:"events"`
 }
 
 func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		err := errors.New("wrong method")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", "wrong method")))
+		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
 	r.ParseForm()
 
-	uid, err := strconv.Atoi(r.Form["uid"][0])
+	uid, err := validateUid(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
-
-	date, err := time.Parse(time.DateTime, r.Form["date"][0])
+	desc, err := validateDesc(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
-
-	desc := r.Form["desc"][0]
+	date, err := validateDate(w, r)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	storage.CreateEvent(uid, desc, date)
 
@@ -45,40 +51,41 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 
 func UpdateEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		err := errors.New("wrong method")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", "wrong method")))
+		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
 	r.ParseForm()
 
-	id, err := strconv.Atoi(r.Form["id"][0])
+	id, err := validateId(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
-
-	uid, err := strconv.Atoi(r.Form["uid"][0])
+	uid, err := validateUid(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
-
-	date, err := time.Parse(time.DateTime, r.Form["date"][0])
+	desc, err := validateDesc(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
-
-	desc := r.Form["desc"][0]
+	date, err := validateDate(w, r)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	err = storage.UpdateEvent(id, uid, desc, date)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
@@ -88,17 +95,18 @@ func UpdateEvent(w http.ResponseWriter, r *http.Request) {
 
 func DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		err := errors.New("wrong method")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", "wrong method")))
+		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
 	r.ParseForm()
 
-	id, err := strconv.Atoi(r.Form["id"][0])
+	id, err := validateId(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
@@ -106,6 +114,7 @@ func DeleteEvent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
@@ -115,32 +124,35 @@ func DeleteEvent(w http.ResponseWriter, r *http.Request) {
 
 func EventsForDay(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		err := errors.New("wrong method")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", "wrong method")))
+		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
 	r.ParseForm()
 
-	uid, err := strconv.Atoi(r.Form["uid"][0])
+	uid, err := validateUid(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
-	var result result
-	result.Events, err = storage.GetEventsForDate(uid, 0, 1)
+	var res response
+	res.Result.Events, err = storage.GetEventsForDate(uid, 0, 1)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
-	resp, err := json.Marshal(result)
+	resp, err := json.Marshal(res)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
@@ -150,32 +162,35 @@ func EventsForDay(w http.ResponseWriter, r *http.Request) {
 
 func EventsForWeek(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		err := errors.New("wrong method")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", "wrong method")))
+		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
 	r.ParseForm()
 
-	uid, err := strconv.Atoi(r.Form["uid"][0])
+	uid, err := validateUid(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
-	var result result
-	result.Events, err = storage.GetEventsForDate(uid, 0, 7)
+	var res response
+	res.Result.Events, err = storage.GetEventsForDate(uid, 0, 7)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
-	resp, err := json.Marshal(result)
+	resp, err := json.Marshal(res)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
@@ -185,32 +200,35 @@ func EventsForWeek(w http.ResponseWriter, r *http.Request) {
 
 func EventsForMonth(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		err := errors.New("wrong method")
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", "wrong method")))
+		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
 	r.ParseForm()
 
-	uid, err := strconv.Atoi(r.Form["uid"][0])
+	uid, err := validateUid(w, r)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
-	var result result
-	result.Events, err = storage.GetEventsForDate(uid, 1, 0)
+	var res response
+	res.Result.Events, err = storage.GetEventsForDate(uid, 1, 0)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 
-	resp, err := json.Marshal(result)
+	resp, err := json.Marshal(res)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte(fmt.Sprintf("{\"error\": \"%s\"}", err.Error())))
+		log.Println(err)
 		return
 	}
 

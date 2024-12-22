@@ -23,10 +23,8 @@ type Event struct {
 }
 
 func ReturnStorage() *Storage {
-	return &Storage{}
+	return &Storage{Events: []Event{}}
 }
-
-// POST /create_event POST /update_event POST /delete_event GET /events_for_day GET /events_for_week GET /events_for_month
 
 func (s *Storage) CreateEvent(uid int, desc string, date time.Time) {
 	var e Event
@@ -66,7 +64,6 @@ func (s *Storage) GetEventsForDate(uid int, month int, day int) ([]Event, error)
 
 	var result []Event
 	for _, e := range s.Events {
-
 		if e.UserId == uid && e.Date.Before(d) && now.Before(e.Date) {
 			result = append(result, e)
 		}

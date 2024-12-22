@@ -26,6 +26,32 @@ func Wget() {
 }
 
 func getPage(url string) {
+	// Если рекурсивное скачивание отключено.
+	if !r {
+		file, err := os.Create("output.html")
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+
+		r, err := http.Get(url)
+		if err != nil {
+			panic(err)
+		}
+
+		defer r.Body.Close()
+
+		if r.StatusCode != http.StatusOK {
+			log.Fatal("request denied")
+		}
+
+		_, err = io.Copy(file, r.Body)
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+
 	// Отправляет запрос.
 	r, err := http.Get(url)
 	if err != nil {
@@ -38,8 +64,6 @@ func getPage(url string) {
 		log.Fatal("request denied")
 	}
 
-	fmt.Println(r.Request)
-
 	// Считывает тело ответа.
 	body := r.Body
 
@@ -50,7 +74,7 @@ func getPage(url string) {
 
 	bodyS := string(bodyB)
 
-	// Ищет ссылки в теле ответа.
+	// Упрощенный поиск ссылок в теле ответа.
 	rgx := regexp.MustCompile(`href=".*"`)
 	match := rgx.FindAllString(bodyS, -1)
 
@@ -69,7 +93,10 @@ func getPage(url string) {
 func createFile(body string, url string) {
 	newUrl := strings.ReplaceAll(url, "http://", "")
 	newUrl = strings.ReplaceAll(newUrl, "https://", "")
+	newUrl = strings.ReplaceAll(newUrl, "//", "")
 	newUrl = strings.ReplaceAll(newUrl, "/", "-")
+	newUrl = strings.ReplaceAll(newUrl, ".html", "")
+	newUrl = strings.TrimRight(newUrl, "-")
 
 	file, err := os.Create(newUrl + ".html")
 	if err != nil {
@@ -79,80 +106,3 @@ func createFile(body string, url string) {
 
 	fmt.Fprintln(file, body)
 }
-
-/*
-func wget(url string) {
-	r, err := http.Get(url)
-	if err != nil {
-		panic(err)
-	}
-
-	defer r.Body.Close()
-
-	if r.StatusCode != http.StatusOK {
-		log.Fatal("request denied")
-	}
-
-	body := r.Body
-
-	recursive(body)
-	createFile(body)
-
-}
-*/
-
-/*
-func recursive(body io.ReadCloser) {
-	bodyBytes, err := io.ReadAll(body)
-	if err != nil {
-		log.Fatal(err)
-	}
-	bodyString := string(bodyBytes)
-
-	r := regexp.MustCompile(`href=".*"`)
-	matches := r.FindAllString(bodyString, -1)
-
-	for _, r := range matches {
-		fmt.Println(r)
-		fmt.Println(" ")
-	}
-}
-*/
-
-/*
-func main() {
-	file, err := os.Create("example.html")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	r, err := http.Get("https://google.com")
-	if err != nil {
-		panic(err)
-	}
-
-	defer r.Body.Close()
-
-	if r.StatusCode != http.StatusOK {
-		log.Fatal("request denied")
-	}
-
-	recursive(r.Body)
-
-	_, err = io.Copy(file, r.Body)
-	if err != nil {
-		panic(err)
-	}
-
-}
-
-func recursive(b io.ReadCloser) {
-	bodyBytes, err := io.ReadAll(b)
-	if err != nil {
-		log.Fatal(err)
-	}
-	bodyString := string(bodyBytes)
-	log.Println(bodyString, "f")
-}
-*/

@@ -8,11 +8,11 @@ import (
 var (
 	input string
 
-	r string // cкачивать рекурсивно
+	r bool // cкачивать рекурсивно
 )
 
 func GetFlags() {
-	flag.StringVar(&r, "r", "", "cкачивать рекурсивно")
+	flag.BoolVar(&r, "r", false, "cкачивать рекурсивно")
 	flag.Parse()
 
 	if len(flag.Args()) != 1 {

@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"log"
 	"net"
+	"os"
+	"time"
 )
 
 /*
@@ -23,11 +27,34 @@ go-telnet --timeout=3s 1.1.1.1 123
 */
 
 func main() {
-	conn, err := net.Dial("tcp", "golang.org:http")
+	GetFlags()
+
+	conn, err := net.DialTimeout("tcp", fmt.Sprintf("%s:%d", host, port), time.Duration(timeout)*time.Second)
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
 
 	defer conn.Close()
+
+	r := bufio.NewReader(os.Stdin)
+
+	for {
+		// Отправляет сообщение.
+		input, err := r.ReadString('\n')
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		fmt.Fprintln(conn, input)
+
+		// Печатает полученные данные.
+		status, err := bufio.NewReader(conn).ReadString('\n')
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		fmt.Println(status)
+	}
 }

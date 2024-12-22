@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -29,8 +30,7 @@ import (
 	3. В случае ошибки бизнес-логики сервер должен возвращать HTTP 503.
 	В случае ошибки входных данных (невалидный int например) сервер должен возвращать HTTP 400.
 	В случае остальных ошибок сервер должен возвращать HTTP 500.
-	Web-сервер должен запускаться на порту указанном в конфиге и выводить в лог каждый обработанный запрос.
-	4. Код должен проходить проверки go vet и golint.
+	4. Web-сервер должен запускаться на порту указанном в конфиге и выводить в лог каждый обработанный запрос.
 */
 
 func main() {
@@ -42,9 +42,11 @@ func main() {
 	http.HandleFunc("/events_for_week", Logger(EventsForWeek))
 	http.HandleFunc("/events_for_month", Logger(EventsForMonth))
 
+	storage = ReturnStorage()
+
 	// Сервер с реализацией graceful shutdown.
 	// https://pkg.go.dev/net/http#Server.Shutdown
-	server := &http.Server{Addr: ":3000", Handler: nil}
+	server := &http.Server{Addr: fmt.Sprintf(":%d", PORT), Handler: nil}
 
 	idleConnsClosed := make(chan struct{})
 

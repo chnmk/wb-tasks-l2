@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"errors"
 	"regexp"
 	"strconv"
 	"unicode"
@@ -25,31 +25,29 @@ import (
 Функция должна проходить все тесты. Код должен проходить проверки go vet и golint.
 */
 
-func Unpack(input string) string {
+func Unpack(input string) (string, error) {
 	// Проверка на пустую строку.
 	if input == "" {
-		return ""
+		return "", errors.New("пустая строка")
 	}
 
 	// Проверка на наличие не только цифр.
 	ok, err := regexp.MatchString("[^0-9]", input)
 	if err != nil {
-		log.Print(err)
-		return ""
+		return "", err
 	}
 	if !ok {
-		log.Print("некорректная строка")
-		return ""
+		return "", errors.New("некорректная строка")
 	}
 
 	// Проверка на наличие цифр.
 	ok, err = regexp.MatchString("[0-9]", input)
 	if err != nil {
-		log.Print(err)
-		return ""
+		return "", err
+
 	}
 	if !ok {
-		return input
+		return input, nil
 	}
 
 	var result []rune
@@ -82,8 +80,7 @@ func Unpack(input string) string {
 		// Если число - добавляет предыдущий символ до нужного количества.
 		num, err := strconv.Atoi(string(r))
 		if err != nil {
-			log.Print("внутренняя ошибка")
-			return ""
+			return "", errors.New("внутренняя ошибка")
 		}
 		for i := 0; i < num-1; i++ {
 			result = append(result, prev)
@@ -91,5 +88,5 @@ func Unpack(input string) string {
 
 	}
 
-	return string(result)
+	return string(result), nil
 }

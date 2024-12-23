@@ -8,11 +8,26 @@ import "fmt"
 	https://en.wikipedia.org/wiki/Visitor_pattern
 */
 
+/*
+	Описание...
+
+	Плюсы:
+		- ...
+		- ...
+	Минусы:
+		- ...
+
+	Примеры использования:
+		- ...
+*/
+
+// Хотим добавлять новые методы для сотрудников.
 type Employee interface {
 	getType() string
 	accept(Visitor)
 }
 
+// Первый тип сотрудника - дизайнер.
 type Designer struct {
 	id          int
 	name        string
@@ -21,6 +36,7 @@ type Designer struct {
 	currentTask string
 }
 
+// Принимаем новый метод.
 func (d *Designer) accept(v Visitor) {
 	v.visitForDesigner(d)
 }
@@ -29,6 +45,7 @@ func (d *Designer) getType() string {
 	return "Designer"
 }
 
+// Второй тип сотрудника - HR.
 type HR struct {
 	id     int
 	name   string
@@ -43,11 +60,13 @@ func (h *HR) getType() string {
 	return "HR"
 }
 
+// Готовы принять методы любой структуры, которая реализует интерфейс Visitor.
 type Visitor interface {
 	visitForDesigner(*Designer)
 	visitForHR(*HR)
 }
 
+// Пример структуры, которая реализует Visitor.
 type salaryCalculator struct {
 	salary int
 }

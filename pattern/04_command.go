@@ -10,51 +10,69 @@ import (
 	https://en.wikipedia.org/wiki/Command_pattern
 */
 
-type Switch struct {
-	command Command
-}
+/*
+	Описание...
 
-func (p *Switch) switchSignal() {
-	p.command.execute()
-}
+	Плюсы:
+		- ...
+		- ...
+	Минусы:
+		- ...
 
-type Command interface {
-	execute()
-}
+	Примеры использования:
+		- ...
+*/
 
-type StartCommand struct {
-	client Client
-}
-
-func (c *StartCommand) execute() {
-	c.client.start()
-}
-
-type ShutdownCommand struct {
-	client Client
-}
-
-func (c *ShutdownCommand) execute() {
-	c.client.shutdown()
-}
-
+// Клиент, которому мы хотим посылать сигналы.
 type Client interface {
 	start()
 	shutdown()
 }
 
 type MyClient struct {
-	isRunning bool
+	active bool
 }
 
 func (c *MyClient) start() {
-	c.isRunning = true
+	c.active = true
 	fmt.Println("Starting...")
 }
 
 func (c *MyClient) shutdown() {
-	c.isRunning = false
+	c.active = false
 	fmt.Println("Shutting down...")
+}
+
+// Хотим создать объекты, которые отправляли бы определенный сигнал клиенту.
+type Switch struct {
+	command Command
+}
+
+func (p *Switch) switchSignal() {
+	p.command.do()
+}
+
+// Создаём разные виды команд, чтобы использовать их в разных объектах.
+type Command interface {
+	do()
+}
+
+// Команда для запуска клиента.
+type StartCommand struct {
+	client Client
+}
+
+func (c *StartCommand) do() {
+	c.client.start()
+}
+
+// Команда для отключения клиента.
+type ShutdownCommand struct {
+	client Client
+}
+
+func (c *ShutdownCommand) do() {
+	c.client.shutdown()
 }
 
 /*

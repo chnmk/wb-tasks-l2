@@ -8,6 +8,24 @@ import "fmt"
 	https://en.wikipedia.org/wiki/State_pattern
 */
 
+/*
+	Описание...
+
+	Плюсы:
+		- ...
+		- ...
+	Минусы:
+		- ...
+
+	Примеры использования:
+		- ...
+*/
+
+type State interface {
+	describe()
+}
+
+// Структура человека с различными состояниями.
 type Human struct {
 	name          string
 	currentState  State
@@ -16,18 +34,16 @@ type Human struct {
 	idlingState   State
 }
 
-func (p *Human) setState(state State) {
-	p.currentState = state
-}
-
 func (p *Human) describe() {
 	p.currentState.describe()
 }
 
-type State interface {
-	describe()
+// Установка состояния для человека.
+func (p *Human) setState(state State) {
+	p.currentState = state
 }
 
+// Первое состояние и функция, которая будет вызываться при этом состоянии.
 type WorkingState struct {
 	human *Human
 }
@@ -36,6 +52,7 @@ func (s *WorkingState) describe() {
 	fmt.Printf("%s is working\n", s.human.name)
 }
 
+// Второе состояние, которая будет вызываться при этом состоянии.
 type StudyingState struct {
 	human *Human
 }
@@ -44,6 +61,7 @@ func (s *StudyingState) describe() {
 	fmt.Printf("%s is studying\n", s.human.name)
 }
 
+// Третье состояние, которая будет вызываться при этом состоянии.
 type IdlingState struct {
 	human *Human
 }

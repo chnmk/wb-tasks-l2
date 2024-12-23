@@ -10,6 +10,20 @@ import (
 	https://en.wikipedia.org/wiki/Factory_method_pattern
 */
 
+/*
+	Описание...
+
+	Плюсы:
+		- ...
+		- ...
+	Минусы:
+		- ...
+
+	Примеры использования:
+		- ...
+*/
+
+// Интерфейс абстрактного продукта, у которого есть имя и цена.
 type IProduct interface {
 	setName(name string)
 	setPrice(price int)
@@ -17,6 +31,7 @@ type IProduct interface {
 	getPrice() int
 }
 
+// Абстрактный продукт.
 type Product struct {
 	name  string
 	price int
@@ -38,6 +53,7 @@ func (t *Product) getPrice() int {
 	return t.price
 }
 
+// Конкретный продукт 1 и функция для его создания.
 type Tablet struct {
 	Product
 }
@@ -55,6 +71,7 @@ type Laptop struct {
 	Product
 }
 
+// Конкретный продукт 2 и функция для его создания.
 func newLaptop1() IProduct {
 	return &Laptop{
 		Product: Product{
@@ -64,6 +81,7 @@ func newLaptop1() IProduct {
 	}
 }
 
+// Функция для создания любого продукта IProduct.
 func getProduct(t string) (IProduct, error) {
 	switch t {
 	case "Tablet-1":

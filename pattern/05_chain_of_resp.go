@@ -8,11 +8,26 @@ import "fmt"
 	https://en.wikipedia.org/wiki/Chain-of-responsibility_pattern
 */
 
+/*
+	Описание...
+
+	Плюсы:
+		- ...
+		- ...
+	Минусы:
+		- ...
+
+	Примеры использования:
+		- ...
+*/
+
+// Интерфейс, который должен быть реализован всеми обработчиками в цепочкею
 type Handler interface {
 	handle(*Request)
 	setNext(Handler)
 }
 
+// Первый элемент цепочки.
 type Validator struct {
 	next Handler
 }
@@ -31,6 +46,7 @@ func (r *Validator) setNext(next Handler) {
 	r.next = next
 }
 
+// Второй элемент цепочки.
 type Converter struct {
 	next Handler
 }
@@ -49,6 +65,7 @@ func (r *Converter) setNext(next Handler) {
 	r.next = next
 }
 
+// Третий элемент цепочки.
 type Printer struct {
 	next Handler
 }
@@ -65,6 +82,7 @@ func (r *Printer) setNext(next Handler) {
 	r.next = next
 }
 
+// Запрос, который нужно обработать.
 type Request struct {
 	Type    int
 	Content string
